@@ -52,7 +52,7 @@ class ForecastViewController: UIViewController {
                 self.updateTodayData()
                 self.tableView.reloadData()
             case .failure(let error):
-                let alert = self.setupAlert(alertText: "Error", alertMessage: error.localizedDescription)
+                let alert = self.setupAlert(alertText: "Error", alertMessage: error.errorDescriptionCustom)
                 self.present(alert, animated: true)
             }
         }

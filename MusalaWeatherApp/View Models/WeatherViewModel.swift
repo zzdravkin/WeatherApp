@@ -10,7 +10,7 @@ import Foundation
 import RealmSwift
 
 class WeatherViewModel {
-    func fetchPrimaryData(_ id: Int, completion: @escaping (Result<WeatherModel, Error>) -> Void) {
+    func fetchPrimaryData(_ id: Int, completion: @escaping (Result<WeatherModel, NetworkError>) -> Void) {
         guard NetworkMonitor.shared.isConnected() else {
             if let weatherData = getLastWeatherData() {
                 completion(.success(weatherData))

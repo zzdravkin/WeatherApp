@@ -26,10 +26,9 @@ class AddCityViewModel {
             case let .success(data):
                 let realm = try! Realm()
                 try! realm.write {
-                    if self.cityAlreadyAdded(newData: data) {
-                    } else {
+                    guard !self.cityAlreadyAdded(newData: data) else { return  }
                         realm.create(WeatherModel.self, value: data, update: .modified)
-                    }
+                    
                 }
             }
         }

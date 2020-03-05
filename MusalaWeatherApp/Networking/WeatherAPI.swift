@@ -15,7 +15,7 @@ struct WeatherAPI {
     // Create background queue
     let queue = DispatchQueue.global(qos: .background)
     
-    typealias serverResponse = Result<WeatherModel, Error>
+    typealias serverResponse = Result<WeatherModel, NetworkError>
     
     var urlComponents: URLComponents {
         var urlComponents = URLComponents()
@@ -23,11 +23,9 @@ struct WeatherAPI {
         urlComponents.host = "www.metaweather.com"
         return urlComponents
     }
-    
     func fetchOneCityData(withWoeid: Int, completion: @escaping (serverResponse) -> Void) {
         fetch(resources: withWoeid, completion: completion)
     }
-    
     private func fetch(resources: Int, completion: @escaping (serverResponse) -> Void) {
         var urlComponents = self.urlComponents
         urlComponents.path = "/api/location/\(resources)"
@@ -36,7 +34,6 @@ struct WeatherAPI {
             completion(.failure(NetworkError.badURL))
             return
         }
-        
         queue.async {
             let urlSession = URLSession.shared
             urlSession.dataTask(with: url) { data, response, error in
@@ -46,30 +43,18 @@ struct WeatherAPI {
                     }
                     return
                 }
-                
                 guard let mime = response?.mimeType, mime == "application/json" else {
                     DispatchQueue.main.async {
                         completion(.failure(NetworkError.mimeTypeError))
                     }
                     return
                 }
-                
                 if let data = data {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        decoder.dateDecodingStrategy = .formatted(DateFormatter.iso8601Full)
-                        
-                        let json = try decoder.decode(WeatherModel.self, from: data)
-                        
-                        DispatchQueue.main.async {
-                            completion(.success(json))
-                        }
-                    } catch {
-                        debugPrint("error: \(error.localizedDescription)")
-                        DispatchQueue.main.async {
-                            completion(.failure(NetworkError.jsonParse(error.localizedDescription)))
-                        }
+                    
+                    let json = Bundle.main.decodeFromData(WeatherModel.self, from: data, dateDecodingStrategy: .formatted(DateFormatter.iso8601Full), keyDecodingStrategy: .convertFromSnakeCase)
+                    
+                    DispatchQueue.main.async {
+                        completion(json)
                     }
                 }
             }.resume()

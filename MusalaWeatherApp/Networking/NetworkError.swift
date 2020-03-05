@@ -16,7 +16,7 @@ enum NetworkError: Error {
 }
 
 extension NetworkError: LocalizedError {
-    var errorDescription: String? {
+     var errorDescriptionCustom: String {
         switch self {
         case .badURL:
             return "The URL is not valid."
